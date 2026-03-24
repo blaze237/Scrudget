@@ -1,20 +1,17 @@
+import 'react-native-get-random-values';
+import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { BudgetProvider } from './src/context/BudgetContext';
+import { ConfirmProvider } from './src/context/ConfirmContext';
+import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <BudgetProvider>
+      <ConfirmProvider>
+        <StatusBar style="light" />
+        <AppNavigator />
+      </ConfirmProvider>
+    </BudgetProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
