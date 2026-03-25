@@ -67,7 +67,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                 <TouchableOpacity style={[styles.cancelBtn, { borderColor: colors.textSecondary }]} onPress={handleCancel}>
                   <Text style={[styles.cancelText, { color: colors.textSecondary }]}>No</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.confirmBtn, { backgroundColor: colors.negative }]} onPress={handleConfirm}>
+                <TouchableOpacity style={[styles.confirmBtn, { backgroundColor: colors.accent }]} onPress={handleConfirm}>
                   <Text style={[styles.confirmText, { color: '#ffffff' }]}>Yes</Text>
                 </TouchableOpacity>
               </View>

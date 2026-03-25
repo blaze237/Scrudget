@@ -14,10 +14,10 @@ import { useScrudget } from '../context/ScrudgetContext';
 
 export const PASTEL_COLORS = [
   '#FFB3BA', // Red
-  '#FFDFBA', // Orange
-  '#FFFFBA', // Yellow
-  '#BAFFC9', // Green
-  '#BAE1FF', // Blue
+  '#FBCFE8', // Pink
+  '#E9D5FF', // Lavender
+  '#C7D2FE', // Indigo
+  '#BFDBFE', // Blue
   '#D3B8D8', // Purple
   '#F3D1F4', // Pink
   '#B5E1E9', // Teal

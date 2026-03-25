@@ -52,7 +52,7 @@ export default function AddExpenseModal({
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={[styles.overlay, { backgroundColor: colors.modalOverlay }]}
       >
-        <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.negative }]}>
+        <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.accent }]}>
           <Text style={[styles.title, { color: colors.textPrimary }]}>New Expense</Text>
 
           <Text style={[styles.label, { color: colors.textSecondary }]}>Expense Name</Text>
@@ -85,7 +85,7 @@ export default function AddExpenseModal({
             <TouchableOpacity
               style={[
                 styles.saveBtn,
-                { backgroundColor: colors.negative },
+                { backgroundColor: colors.accent },
                 (!name.trim() || !amount) && styles.saveBtnDisabled,
               ]}
               onPress={handleSave}
