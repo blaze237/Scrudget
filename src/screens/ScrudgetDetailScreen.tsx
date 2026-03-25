@@ -102,9 +102,9 @@ export default function ScrudgetDetailScreen({ route, navigation }: Props) {
       <View style={{ backgroundColor: scrudget.color || colors.surface }}>
         <View style={[styles.header, { borderBottomColor: colors.border }]}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Text style={[styles.backText, { color: '#1a2430', fontWeight: '600' }]}>‹ Scrudgets</Text>
+            <Text style={[styles.backText, { color: '#000000', fontWeight: '700' }]}>‹ Scrudgets</Text>
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: '#1a2430' }]}>{scrudget.name}</Text>
+          <Text style={[styles.headerTitle, { color: '#000000' }]}>{scrudget.name}</Text>
           <View style={styles.headerSpacer} />
         </View>
       </View>

@@ -9,16 +9,14 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useScrudget } from '../context/ScrudgetContext';
-import { theme, formatCurrency } from '../theme';
+import { formatCurrency } from '../theme';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ArchivedPeriods'>;
 
 export default function ArchivedPeriodsScreen({ route, navigation }: Props) {
   const { scrudgetId } = route.params;
-  const { state } = useScrudget();
-
-  const scrudget = state.scrudgets.find((b) => b.id === scrudgetId);
+  const { state, colors } = useScrudget();
 
   const archivedPeriods = useMemo(
     () =>
@@ -36,13 +34,13 @@ export default function ArchivedPeriodsScreen({ route, navigation }: Props) {
     });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backText}>‹ Back</Text>
+          <Text style={[styles.backText, { color: colors.textSecondary }]}>‹ Back</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Past Periods</Text>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Past Periods</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -52,7 +50,7 @@ export default function ArchivedPeriodsScreen({ route, navigation }: Props) {
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={styles.periodCard}
+            style={[styles.periodCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={() =>
               navigation.navigate('PeriodDetail', {
                 scrudgetId,
@@ -62,10 +60,10 @@ export default function ArchivedPeriodsScreen({ route, navigation }: Props) {
             activeOpacity={0.7}
           >
             <View>
-              <Text style={styles.periodDates}>
+              <Text style={[styles.periodDates, { color: colors.textPrimary }]}>
                 {formatDate(item.startDate)} — {item.endDate ? formatDate(item.endDate) : 'Now'}
               </Text>
-              <Text style={styles.periodInfo}>
+              <Text style={[styles.periodInfo, { color: colors.textSecondary }]}>
                 Started: £ {item.startingBalance.toFixed(2)}
               </Text>
             </View>
@@ -76,20 +74,20 @@ export default function ArchivedPeriodsScreen({ route, navigation }: Props) {
                   {
                     color:
                       (item.finalBalance ?? 0) >= 0
-                        ? theme.colors.positive
-                        : theme.colors.negative,
+                        ? colors.positive
+                        : colors.negative,
                   },
                 ]}
               >
                 {formatCurrency(item.finalBalance ?? 0)}
               </Text>
-              <Text style={styles.chevron}>›</Text>
+              <Text style={[styles.chevron, { color: colors.accent }]}>›</Text>
             </View>
           </TouchableOpacity>
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No archived periods</Text>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No archived periods</Text>
           </View>
         }
       />
@@ -100,27 +98,23 @@ export default function ArchivedPeriodsScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: theme.spacing.md,
-    paddingHorizontal: theme.spacing.md,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
   },
   backBtn: {
     flex: 1,
   },
   backText: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.fontSize.md,
+    fontSize: 16,
   },
   headerTitle: {
-    color: theme.colors.textPrimary,
-    fontSize: theme.fontSize.lg,
+    fontSize: 20,
     fontWeight: '700',
     textAlign: 'center',
   },
@@ -128,31 +122,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    paddingVertical: theme.spacing.sm,
+    paddingVertical: 8,
     flexGrow: 1,
   },
   periodCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: theme.colors.border,
     paddingVertical: 16,
-    paddingHorizontal: theme.spacing.md,
-    marginHorizontal: theme.spacing.md,
-    marginVertical: theme.spacing.xs,
+    paddingHorizontal: 16,
+    marginHorizontal: 16,
+    marginVertical: 4,
   },
   periodDates: {
-    color: theme.colors.textPrimary,
-    fontSize: theme.fontSize.md,
+    fontSize: 16,
     fontWeight: '500',
     marginBottom: 4,
   },
   periodInfo: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.fontSize.sm,
+    fontSize: 13,
   },
   rightSection: {
     flexDirection: 'row',
@@ -160,11 +150,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   periodBalance: {
-    fontSize: theme.fontSize.md,
+    fontSize: 16,
     fontWeight: '600',
   },
   chevron: {
-    color: theme.colors.accent,
     fontSize: 22,
     fontWeight: '700',
   },
@@ -173,7 +162,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.fontSize.md,
+    fontSize: 16,
   },
 });

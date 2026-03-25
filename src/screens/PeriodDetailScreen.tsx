@@ -10,14 +10,14 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useScrudget } from '../context/ScrudgetContext';
 import ExpenseRow from '../components/ExpenseRow';
-import { theme, formatCurrency } from '../theme';
+import { formatCurrency } from '../theme';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PeriodDetail'>;
 
 export default function PeriodDetailScreen({ route, navigation }: Props) {
   const { scrudgetId, periodId } = route.params;
-  const { state } = useScrudget();
+  const { state, colors } = useScrudget();
 
   const period = state.periods.find((p) => p.id === periodId);
   const scrudget = state.scrudgets.find((b) => b.id === scrudgetId);
@@ -41,22 +41,22 @@ export default function PeriodDetailScreen({ route, navigation }: Props) {
 
   if (!period) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>Period not found</Text>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <Text style={[styles.errorText, { color: colors.negative }]}>Period not found</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backText}>‹ Back</Text>
+          <Text style={[styles.backText, { color: colors.textSecondary }]}>‹ Back</Text>
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>{scrudget?.name ?? 'Scrudget'}</Text>
-          <Text style={styles.headerSubtitle}>
+          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>{scrudget?.name ?? 'Scrudget'}</Text>
+          <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
             {formatDate(period.startDate)} — {period.endDate ? formatDate(period.endDate) : 'Now'}
           </Text>
         </View>
@@ -85,38 +85,38 @@ export default function PeriodDetailScreen({ route, navigation }: Props) {
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No expenses in this period</Text>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No expenses in this period</Text>
           </View>
         }
       />
 
       {/* Summary Footer */}
-      <View style={styles.bottomSection}>
+      <View style={[styles.bottomSection, { borderTopColor: colors.border }]}>
         <View style={styles.summaryRow}>
           <View>
-            <Text style={styles.summaryLabel}>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
               Scrudget:{' '}
-              <Text style={{ color: theme.colors.positive }}>
+              <Text style={{ color: colors.positive }}>
                 + £ {period.startingBalance.toFixed(2)}
               </Text>
             </Text>
-            <Text style={styles.summaryLabel}>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
               Expenses:{' '}
-              <Text style={{ color: theme.colors.negative }}>
+              <Text style={{ color: colors.negative }}>
                 - £ {totalExpenses.toFixed(2)}
               </Text>
             </Text>
           </View>
           <View style={styles.balanceSection}>
-            <Text style={styles.balanceLabel}>Final Balance</Text>
+            <Text style={[styles.balanceLabel, { color: colors.textSecondary }]}>Final Balance</Text>
             <Text
               style={[
                 styles.balanceAmount,
                 {
                   color:
                     (period.finalBalance ?? 0) >= 0
-                      ? theme.colors.positive
-                      : theme.colors.negative,
+                      ? colors.positive
+                      : colors.negative,
                 },
               ]}
             >
@@ -132,35 +132,30 @@ export default function PeriodDetailScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: theme.spacing.md,
-    paddingHorizontal: theme.spacing.md,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
   },
   backBtn: {
     flex: 1,
   },
   backText: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.fontSize.md,
+    fontSize: 16,
   },
   headerCenter: {
     alignItems: 'center',
   },
   headerTitle: {
-    color: theme.colors.textPrimary,
-    fontSize: theme.fontSize.lg,
+    fontSize: 20,
     fontWeight: '700',
   },
   headerSubtitle: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.fontSize.sm,
+    fontSize: 13,
     marginTop: 2,
   },
   headerSpacer: {
@@ -174,20 +169,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.fontSize.md,
+    fontSize: 16,
   },
   errorText: {
-    color: theme.colors.negative,
-    fontSize: theme.fontSize.lg,
+    fontSize: 20,
     textAlign: 'center',
     marginTop: 100,
   },
   bottomSection: {
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.md,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -195,20 +187,18 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   summaryLabel: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.fontSize.sm,
+    fontSize: 13,
     lineHeight: 20,
   },
   balanceSection: {
     alignItems: 'flex-end',
   },
   balanceLabel: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.fontSize.sm,
+    fontSize: 13,
     marginBottom: 2,
   },
   balanceAmount: {
-    fontSize: theme.fontSize.lg,
+    fontSize: 20,
     fontWeight: '700',
   },
 });

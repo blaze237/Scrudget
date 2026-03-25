@@ -72,7 +72,12 @@ export default function AddScrudgetModal({ visible, onClose, onSave }: AddScrudg
           />
 
           <Text style={[styles.label, { color: colors.textSecondary }]}>Color Indicator</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.colorRow}>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            style={styles.colorRow}
+            contentContainerStyle={styles.colorContent}
+          >
             {PASTEL_COLORS.map((c) => (
               <TouchableOpacity
                 key={c}
@@ -142,9 +147,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   colorRow: {
-    flexDirection: 'row',
     marginTop: 8,
     marginBottom: 8,
+  },
+  colorContent: {
+    paddingVertical: 5,
+    paddingHorizontal: 2,
   },
   colorCircle: {
     width: 32,
