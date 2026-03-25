@@ -1,4 +1,4 @@
-export interface Budget {
+export interface Scrudget {
   id: string;
   name: string;
   baseValue: number;
@@ -9,7 +9,7 @@ export interface Budget {
 
 export interface Expense {
   id: string;
-  budgetId: string;
+  scrudgetId: string;
   periodId: string;
   name: string;
   amount: number; // always positive, displayed as negative
@@ -18,7 +18,7 @@ export interface Expense {
 
 export interface Period {
   id: string;
-  budgetId: string;
+  scrudgetId: string;
   startDate: string; // ISO date string
   endDate: string | null; // null = current/active period
   startingBalance: number;
@@ -26,7 +26,7 @@ export interface Period {
 }
 
 export interface AppState {
-  budgets: Budget[];
+  scrudgets: Scrudget[];
   expenses: Expense[];
   periods: Period[];
   isLoaded: boolean;
@@ -34,12 +34,12 @@ export interface AppState {
 }
 
 export type AppAction =
-  | { type: 'LOAD_DATA'; payload: { budgets: Budget[]; expenses: Expense[]; periods: Period[]; themePref: 'light' | 'dark' } }
-  | { type: 'ADD_BUDGET'; payload: { name: string; baseValue: number; color: string } }
-  | { type: 'EDIT_BUDGET'; payload: { budgetId: string; name: string; baseValue: number; color: string } }
-  | { type: 'DELETE_BUDGET'; payload: { budgetId: string } }
-  | { type: 'ADD_EXPENSE'; payload: { budgetId: string; name: string; amount: number } }
+  | { type: 'LOAD_DATA'; payload: { scrudgets: Scrudget[]; expenses: Expense[]; periods: Period[]; themePref: 'light' | 'dark' } }
+  | { type: 'ADD_SCRUDGET'; payload: { name: string; baseValue: number; color: string } }
+  | { type: 'EDIT_SCRUDGET'; payload: { scrudgetId: string; name: string; baseValue: number; color: string } }
+  | { type: 'DELETE_SCRUDGET'; payload: { scrudgetId: string } }
+  | { type: 'ADD_EXPENSE'; payload: { scrudgetId: string; name: string; amount: number } }
   | { type: 'EDIT_EXPENSE'; payload: { expenseId: string; name: string; amount: number } }
   | { type: 'DELETE_EXPENSE'; payload: { expenseId: string } }
-  | { type: 'RESET_ALL_BUDGETS' }
+  | { type: 'RESET_ALL_SCRUDGETS' }
   | { type: 'TOGGLE_THEME' };

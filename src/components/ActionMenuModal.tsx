@@ -8,7 +8,7 @@ import {
   Platform,
   KeyboardAvoidingView,
 } from 'react-native';
-import { useBudget } from '../context/BudgetContext';
+import { useScrudget } from '../context/ScrudgetContext';
 
 interface ActionMenuModalProps {
   visible: boolean;
@@ -25,7 +25,7 @@ export default function ActionMenuModal({
   onDelete,
   title,
 }: ActionMenuModalProps) {
-  const { colors } = useBudget();
+  const { colors } = useScrudget();
 
   return (
     <Modal visible={visible} transparent animationType="fade">

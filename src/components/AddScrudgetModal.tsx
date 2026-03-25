@@ -10,17 +10,17 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { useBudget } from '../context/BudgetContext';
-import { PASTEL_COLORS, getRandomPastel } from './EditBudgetModal';
+import { useScrudget } from '../context/ScrudgetContext';
+import { PASTEL_COLORS, getRandomPastel } from './EditScrudgetModal';
 
-interface AddBudgetModalProps {
+interface AddScrudgetModalProps {
   visible: boolean;
   onClose: () => void;
   onSave: (name: string, baseValue: number, color: string) => void;
 }
 
-export default function AddBudgetModal({ visible, onClose, onSave }: AddBudgetModalProps) {
-  const { colors } = useBudget();
+export default function AddScrudgetModal({ visible, onClose, onSave }: AddScrudgetModalProps) {
+  const { colors } = useScrudget();
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [color, setColor] = useState('');
@@ -49,9 +49,9 @@ export default function AddBudgetModal({ visible, onClose, onSave }: AddBudgetMo
         style={[styles.overlay, { backgroundColor: colors.modalOverlay }]}
       >
         <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.accent }]}>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>New Budget</Text>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>New Scrudget</Text>
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Budget Name</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Scrudget Name</Text>
           <TextInput
             style={[styles.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }]}
             value={name}

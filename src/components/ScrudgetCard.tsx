@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { formatCurrency } from '../theme';
-import { useBudget } from '../context/BudgetContext';
+import { useScrudget } from '../context/ScrudgetContext';
 
-interface BudgetCardProps {
+interface ScrudgetCardProps {
   name: string;
   balance: number;
   color: string;
@@ -11,8 +11,8 @@ interface BudgetCardProps {
   onDelete?: () => void;
 }
 
-export default function BudgetCard({ name, balance, color, onPress, onDelete }: BudgetCardProps) {
-  const { colors } = useBudget();
+export default function ScrudgetCard({ name, balance, color, onPress, onDelete }: ScrudgetCardProps) {
+  const { colors } = useScrudget();
   return (
     <View style={styles.cardContainer}>
       <TouchableOpacity

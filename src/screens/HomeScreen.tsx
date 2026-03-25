@@ -7,12 +7,13 @@ import {
   StyleSheet,
   StatusBar,
   SafeAreaView,
+  Image,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useBudget } from '../context/BudgetContext';
-import BudgetCard from '../components/BudgetCard';
-import AddBudgetModal from '../components/AddBudgetModal';
-import EditBudgetModal from '../components/EditBudgetModal';
+import { useScrudget } from '../context/ScrudgetContext';
+import ScrudgetCard from '../components/ScrudgetCard';
+import AddScrudgetModal from '../components/AddScrudgetModal';
+import EditScrudgetModal from '../components/EditScrudgetModal';
 import ActionMenuModal from '../components/ActionMenuModal';
 import { useConfirm } from '../context/ConfirmContext';
 import { formatCurrency } from '../theme';
@@ -21,53 +22,53 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
-  const { state, dispatch, colors } = useBudget();
+  const { state, dispatch, colors } = useScrudget();
   const { showConfirmDialog } = useConfirm();
   
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
-  const [selectedBudget, setSelectedBudget] = useState<{ id: string, name: string, baseValue: number, color: string } | null>(null);
+  const [selectedScrudget, setSelectedScrudget] = useState<{ id: string, name: string, baseValue: number, color: string } | null>(null);
 
-  const totalBalance = state.budgets.reduce((sum, b) => sum + b.currentBalance, 0);
+  const totalBalance = state.scrudgets.reduce((sum, b) => sum + b.currentBalance, 0);
 
-  const handleAddBudget = useCallback(
+  const handleAddScrudget = useCallback(
     (name: string, baseValue: number, color: string) => {
-      dispatch({ type: 'ADD_BUDGET', payload: { name, baseValue, color } });
+      dispatch({ type: 'ADD_SCRUDGET', payload: { name, baseValue, color } });
     },
     [dispatch]
   );
 
-  const handleEditBudget = useCallback(
+  const handleEditScrudget = useCallback(
     (id: string, name: string, baseValue: number, color: string) => {
-      dispatch({ type: 'EDIT_BUDGET', payload: { budgetId: id, name, baseValue, color } });
+      dispatch({ type: 'EDIT_SCRUDGET', payload: { scrudgetId: id, name, baseValue, color } });
     },
     [dispatch]
   );
 
-  const handleResetBudgets = useCallback(() => {
-    if (state.budgets.length === 0) return;
+  const handleResetScrudgets = useCallback(() => {
+    if (state.scrudgets.length === 0) return;
     showConfirmDialog(
-      'Reset All Budgets',
-      'This will reset all budget balances to their base values and archive the current period. Continue?',
-      () => dispatch({ type: 'RESET_ALL_BUDGETS' })
+      'Reset All Scrudgets',
+      'This will reset all scrudget balances to their base values and archive the current period. Continue?',
+      () => dispatch({ type: 'RESET_ALL_SCRUDGETS' })
     );
-  }, [dispatch, state.budgets.length, showConfirmDialog]);
+  }, [dispatch, state.scrudgets.length, showConfirmDialog]);
 
-  const handleDeleteBudget = useCallback(() => {
-    if (!selectedBudget) return;
+  const handleDeleteScrudget = useCallback(() => {
+    if (!selectedScrudget) return;
     showConfirmDialog(
-      'Delete Budget',
-      `Are you sure you want to delete "${selectedBudget.name}"? This cannot be undone.`,
+      'Delete Scrudget',
+      `Are you sure you want to delete "${selectedScrudget.name}"? This cannot be undone.`,
       () => {
-        dispatch({ type: 'DELETE_BUDGET', payload: { budgetId: selectedBudget.id } });
-        setSelectedBudget(null);
+        dispatch({ type: 'DELETE_SCRUDGET', payload: { scrudgetId: selectedScrudget.id } });
+        setSelectedScrudget(null);
       }
     );
-  }, [dispatch, selectedBudget, showConfirmDialog]);
+  }, [dispatch, selectedScrudget, showConfirmDialog]);
 
-  const openActionMenu = (budget: any) => {
-    setSelectedBudget({ id: budget.id, name: budget.name, baseValue: budget.baseValue, color: budget.color || '#fff' });
+  const openActionMenu = (scrudget: any) => {
+    setSelectedScrudget({ id: scrudget.id, name: scrudget.name, baseValue: scrudget.baseValue, color: scrudget.color || '#fff' });
     setShowActionMenu(true);
   };
 
@@ -78,7 +79,7 @@ export default function HomeScreen({ navigation }: Props) {
 
   const onActionMenuDelete = () => {
     setShowActionMenu(false);
-    setTimeout(() => handleDeleteBudget(), 300);
+    setTimeout(() => handleDeleteScrudget(), 300);
   };
 
   return (
@@ -87,8 +88,8 @@ export default function HomeScreen({ navigation }: Props) {
 
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <View style={styles.headerTitleSpacer} />
-        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Budgets</Text>
+        <Image source={require('../../assets/icon.png')} style={{ width: 32, height: 32, borderRadius: 8 }} />
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Scrudgets</Text>
         <TouchableOpacity style={styles.themeToggle} onPress={() => dispatch({ type: 'TOGGLE_THEME' })}>
           <Text style={{ fontSize: 24, color: colors.textPrimary }}>
             {state.themePreference === 'light' ? '🌙' : '☀️'}
@@ -96,24 +97,24 @@ export default function HomeScreen({ navigation }: Props) {
         </TouchableOpacity>
       </View>
 
-      {/* Budget List */}
+      {/* Scrudget List */}
       <FlatList
-        data={state.budgets}
+        data={state.scrudgets}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
-          <BudgetCard
+          <ScrudgetCard
             name={item.name}
             balance={item.currentBalance}
             color={item.color || '#cccccc'}
-            onPress={() => navigation.navigate('BudgetDetail', { budgetId: item.id })}
+            onPress={() => navigation.navigate('ScrudgetDetail', { scrudgetId: item.id })}
             onDelete={() => openActionMenu(item)}
           />
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No budgets yet</Text>
-            <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>Tap "Add Budget" to get started</Text>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No scrudgets yet</Text>
+            <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>Tap "Add Scrudget" to get started</Text>
           </View>
         }
       />
@@ -124,22 +125,22 @@ export default function HomeScreen({ navigation }: Props) {
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={[styles.actionBtn, styles.resetBtn, { borderColor: colors.border }]}
-            onPress={handleResetBudgets}
+            onPress={handleResetScrudgets}
           >
-            <Text style={[styles.resetBtnText, { color: colors.textSecondary }]}>Reset Budgets</Text>
+            <Text style={[styles.resetBtnText, { color: colors.textSecondary }]}>Reset Scrudgets</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.actionBtn, styles.addBtn, { borderColor: colors.accent }]}
             onPress={() => setShowAddModal(true)}
           >
-            <Text style={[styles.addBtnText, { color: colors.accent }]}>Add Budget</Text>
+            <Text style={[styles.addBtnText, { color: colors.accent }]}>Add Scrudget</Text>
           </TouchableOpacity>
         </View>
 
         {/* Total Balance */}
-        {state.budgets.length > 0 && (
+        {state.scrudgets.length > 0 && (
           <View style={styles.totalRow}>
-            <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>All Budgets Balance:</Text>
+            <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>All Scrudgets Balance:</Text>
             <Text
               style={[
                 styles.totalAmount,
@@ -152,28 +153,28 @@ export default function HomeScreen({ navigation }: Props) {
         )}
       </View>
 
-      <AddBudgetModal
+      <AddScrudgetModal
         visible={showAddModal}
         onClose={() => setShowAddModal(false)}
-        onSave={handleAddBudget}
+        onSave={handleAddScrudget}
       />
 
-      {selectedBudget && (
-        <EditBudgetModal
+      {selectedScrudget && (
+        <EditScrudgetModal
           visible={showEditModal}
-          budgetId={selectedBudget.id}
-          initialName={selectedBudget.name}
-          initialAmount={selectedBudget.baseValue.toString()}
-          initialColor={selectedBudget.color}
+          scrudgetId={selectedScrudget.id}
+          initialName={selectedScrudget.name}
+          initialAmount={selectedScrudget.baseValue.toString()}
+          initialColor={selectedScrudget.color}
           onClose={() => setShowEditModal(false)}
-          onSave={handleEditBudget}
+          onSave={handleEditScrudget}
         />
       )}
 
-      {selectedBudget && (
+      {selectedScrudget && (
         <ActionMenuModal
           visible={showActionMenu}
-          title={selectedBudget.name}
+          title={selectedScrudget.name}
           onClose={() => setShowActionMenu(false)}
           onEdit={onActionMenuEdit}
           onDelete={onActionMenuDelete}
@@ -193,9 +194,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-  },
-  headerTitleSpacer: {
-    width: 32,
   },
   headerTitle: {
     flex: 1,

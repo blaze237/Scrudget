@@ -10,7 +10,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { useBudget } from '../context/BudgetContext';
+import { useScrudget } from '../context/ScrudgetContext';
 
 export const PASTEL_COLORS = [
   '#FFB3BA', // Red
@@ -21,13 +21,21 @@ export const PASTEL_COLORS = [
   '#D3B8D8', // Purple
   '#F3D1F4', // Pink
   '#B5E1E9', // Teal
+  '#FDFD96', // Pastel Lemon
+  '#CFCFC4', // Pastel Grey
+  '#FFC0CB', // Classic Pink
+  '#E6E6FA', // Lavender
+  '#98FF98', // Mint
+  '#FFD1DC', // Pastel Rose
+  '#AEC6CF', // Pastel Blue
+  '#F49AC2', // Pastel Magenta
 ];
 
 export const getRandomPastel = () => PASTEL_COLORS[Math.floor(Math.random() * PASTEL_COLORS.length)];
 
-interface EditBudgetModalProps {
+interface EditScrudgetModalProps {
   visible: boolean;
-  budgetId: string | null;
+  scrudgetId: string | null;
   initialName: string;
   initialAmount: string;
   initialColor: string;
@@ -35,16 +43,16 @@ interface EditBudgetModalProps {
   onSave: (id: string, name: string, amount: number, color: string) => void;
 }
 
-export default function EditBudgetModal({
+export default function EditScrudgetModal({
   visible,
-  budgetId,
+  scrudgetId,
   initialName,
   initialAmount,
   initialColor,
   onClose,
   onSave,
-}: EditBudgetModalProps) {
-  const { colors } = useBudget();
+}: EditScrudgetModalProps) {
+  const { colors } = useScrudget();
   const [name, setName] = useState(initialName);
   const [amount, setAmount] = useState(initialAmount);
   const [color, setColor] = useState(initialColor);
@@ -58,11 +66,11 @@ export default function EditBudgetModal({
   }, [visible, initialName, initialAmount, initialColor]);
 
   const handleSave = () => {
-    if (!budgetId) return;
+    if (!scrudgetId) return;
     const trimmedName = name.trim();
     const parsedAmount = parseFloat(amount);
     if (trimmedName && !isNaN(parsedAmount) && parsedAmount > 0) {
-      onSave(budgetId, trimmedName, parsedAmount, color);
+      onSave(scrudgetId, trimmedName, parsedAmount, color);
       onClose();
     }
   };
@@ -74,9 +82,9 @@ export default function EditBudgetModal({
         style={[styles.overlay, { backgroundColor: colors.modalOverlay }]}
       >
         <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.accent }]}>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>Edit Budget</Text>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>Edit Scrudget</Text>
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Budget Name</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Scrudget Name</Text>
           <TextInput
             style={[styles.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }]}
             value={name}

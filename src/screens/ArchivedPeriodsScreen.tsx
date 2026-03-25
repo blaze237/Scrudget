@@ -8,24 +8,24 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useBudget } from '../context/BudgetContext';
+import { useScrudget } from '../context/ScrudgetContext';
 import { theme, formatCurrency } from '../theme';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ArchivedPeriods'>;
 
 export default function ArchivedPeriodsScreen({ route, navigation }: Props) {
-  const { budgetId } = route.params;
-  const { state } = useBudget();
+  const { scrudgetId } = route.params;
+  const { state } = useScrudget();
 
-  const budget = state.budgets.find((b) => b.id === budgetId);
+  const scrudget = state.scrudgets.find((b) => b.id === scrudgetId);
 
   const archivedPeriods = useMemo(
     () =>
       state.periods
-        .filter((p) => p.budgetId === budgetId && p.endDate !== null)
+        .filter((p) => p.scrudgetId === scrudgetId && p.endDate !== null)
         .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()),
-    [state.periods, budgetId]
+    [state.periods, scrudgetId]
   );
 
   const formatDate = (iso: string) =>
@@ -55,7 +55,7 @@ export default function ArchivedPeriodsScreen({ route, navigation }: Props) {
             style={styles.periodCard}
             onPress={() =>
               navigation.navigate('PeriodDetail', {
-                budgetId,
+                scrudgetId,
                 periodId: item.id,
               })
             }

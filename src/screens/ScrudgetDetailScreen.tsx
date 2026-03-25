@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useBudget } from '../context/BudgetContext';
+import { useScrudget } from '../context/ScrudgetContext';
 import ExpenseRow from '../components/ExpenseRow';
 import AddExpenseModal from '../components/AddExpenseModal';
 import EditExpenseModal from '../components/EditExpenseModal';
@@ -17,11 +17,11 @@ import { useConfirm } from '../context/ConfirmContext';
 import { formatCurrency } from '../theme';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'BudgetDetail'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'ScrudgetDetail'>;
 
-export default function BudgetDetailScreen({ route, navigation }: Props) {
-  const { budgetId } = route.params;
-  const { state, dispatch, colors } = useBudget();
+export default function ScrudgetDetailScreen({ route, navigation }: Props) {
+  const { scrudgetId } = route.params;
+  const { state, dispatch, colors } = useScrudget();
   const { showConfirmDialog } = useConfirm();
   
   const [showExpenseModal, setShowExpenseModal] = useState(false);
@@ -29,30 +29,30 @@ export default function BudgetDetailScreen({ route, navigation }: Props) {
   const [showActionMenu, setShowActionMenu] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<{ id: string, name: string, amount: number } | null>(null);
 
-  const budget = state.budgets.find((b) => b.id === budgetId);
+  const scrudget = state.scrudgets.find((b) => b.id === scrudgetId);
   const currentExpenses = useMemo(
     () =>
       state.expenses
-        .filter((e) => e.budgetId === budgetId && e.periodId === budget?.currentPeriodId)
+        .filter((e) => e.scrudgetId === scrudgetId && e.periodId === scrudget?.currentPeriodId)
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
-    [state.expenses, budgetId, budget?.currentPeriodId]
+    [state.expenses, scrudgetId, scrudget?.currentPeriodId]
   );
 
   const archivedPeriods = useMemo(
     () =>
       state.periods
-        .filter((p) => p.budgetId === budgetId && p.endDate !== null)
+        .filter((p) => p.scrudgetId === scrudgetId && p.endDate !== null)
         .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()),
-    [state.periods, budgetId]
+    [state.periods, scrudgetId]
   );
 
   const totalExpenses = currentExpenses.reduce((sum, e) => sum + e.amount, 0);
 
   const handleAddExpense = useCallback(
     (name: string, amount: number) => {
-      dispatch({ type: 'ADD_EXPENSE', payload: { budgetId, name, amount } });
+      dispatch({ type: 'ADD_EXPENSE', payload: { scrudgetId, name, amount } });
     },
-    [dispatch, budgetId]
+    [dispatch, scrudgetId]
   );
 
   const handleEditExpense = useCallback(
@@ -89,22 +89,22 @@ export default function BudgetDetailScreen({ route, navigation }: Props) {
     setTimeout(() => handleDeleteExpense(), 300);
   };
 
-  if (!budget) {
+  if (!scrudget) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <Text style={[styles.errorText, { color: colors.negative }]}>Budget not found</Text>
+        <Text style={[styles.errorText, { color: colors.negative }]}>Scrudget not found</Text>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={{ backgroundColor: budget.color || colors.surface }}>
+      <View style={{ backgroundColor: scrudget.color || colors.surface }}>
         <View style={[styles.header, { borderBottomColor: colors.border }]}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Text style={[styles.backText, { color: '#1a2430', fontWeight: '600' }]}>‹ Budgets</Text>
+            <Text style={[styles.backText, { color: '#1a2430', fontWeight: '600' }]}>‹ Scrudgets</Text>
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: '#1a2430' }]}>{budget.name}</Text>
+          <Text style={[styles.headerTitle, { color: '#1a2430' }]}>{scrudget.name}</Text>
           <View style={styles.headerSpacer} />
         </View>
       </View>
@@ -116,10 +116,10 @@ export default function BudgetDetailScreen({ route, navigation }: Props) {
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           <ExpenseRow
-            name="Budget Base"
-            amount={budget.baseValue}
+            name="Scrudget Base"
+            amount={scrudget.baseValue}
             date={
-              state.periods.find((p) => p.id === budget.currentPeriodId)?.startDate ||
+              state.periods.find((p) => p.id === scrudget.currentPeriodId)?.startDate ||
               new Date().toISOString()
             }
             isIncome
@@ -144,7 +144,7 @@ export default function BudgetDetailScreen({ route, navigation }: Props) {
       {archivedPeriods.length > 0 && (
         <TouchableOpacity
           style={[styles.archiveLink, { borderTopColor: colors.border }]}
-          onPress={() => navigation.navigate('ArchivedPeriods', { budgetId })}
+          onPress={() => navigation.navigate('ArchivedPeriods', { scrudgetId })}
         >
           <Text style={[styles.archiveLinkText, { color: colors.accent }]}>
             View Past Periods ({archivedPeriods.length})
@@ -167,7 +167,7 @@ export default function BudgetDetailScreen({ route, navigation }: Props) {
             <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
               Base:{' '}
               <Text style={{ color: colors.positive }}>
-                + £ {budget.baseValue.toFixed(2)}
+                + £ {scrudget.baseValue.toFixed(2)}
               </Text>
             </Text>
             <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
@@ -182,10 +182,10 @@ export default function BudgetDetailScreen({ route, navigation }: Props) {
             <Text
               style={[
                 styles.balanceAmount,
-                { color: budget.currentBalance >= 0 ? colors.positive : colors.negative },
+                { color: scrudget.currentBalance >= 0 ? colors.positive : colors.negative },
               ]}
             >
-              {formatCurrency(budget.currentBalance)}
+              {formatCurrency(scrudget.currentBalance)}
             </Text>
           </View>
         </View>
@@ -193,7 +193,7 @@ export default function BudgetDetailScreen({ route, navigation }: Props) {
 
       <AddExpenseModal
         visible={showExpenseModal}
-        budgetId={budgetId}
+        scrudgetId={scrudgetId}
         onClose={() => setShowExpenseModal(false)}
         onSave={handleAddExpense}
       />

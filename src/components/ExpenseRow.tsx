@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { formatCurrency } from '../theme';
-import { useBudget } from '../context/BudgetContext';
+import { useScrudget } from '../context/ScrudgetContext';
 
 interface ExpenseRowProps {
   name: string;
@@ -12,7 +12,7 @@ interface ExpenseRowProps {
 }
 
 export default function ExpenseRow({ name, amount, date, isIncome, onAction }: ExpenseRowProps) {
-  const { colors } = useBudget();
+  const { colors } = useScrudget();
   const displayDate = new Date(date).toLocaleDateString('en-GB', {
     day: '2-digit',
     month: 'short',

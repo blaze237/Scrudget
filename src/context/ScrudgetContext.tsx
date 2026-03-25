@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { AppState, AppAction, Budget, Expense, Period } from '../types';
-import { saveAll, loadBudgets, loadExpenses, loadPeriods, loadTheme, saveTheme } from '../storage';
+import { AppState, AppAction, Scrudget, Expense, Period } from '../types';
+import { saveAll, loadScrudgets, loadExpenses, loadPeriods, loadTheme, saveTheme } from '../storage';
 import { lightColors, darkColors, ThemeColors } from '../theme';
 
 const initialState: AppState = {
-  budgets: [],
+  scrudgets: [],
   expenses: [],
   periods: [],
   isLoaded: false,
@@ -16,7 +16,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'LOAD_DATA': {
       return {
-        budgets: action.payload.budgets,
+        scrudgets: action.payload.scrudgets,
         expenses: action.payload.expenses,
         periods: action.payload.periods,
         themePreference: action.payload.themePref,
@@ -24,11 +24,11 @@ function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
-    case 'ADD_BUDGET': {
+    case 'ADD_SCRUDGET': {
       const periodId = uuidv4();
-      const budgetId = uuidv4();
-      const newBudget: Budget = {
-        id: budgetId,
+      const scrudgetId = uuidv4();
+      const newScrudget: Scrudget = {
+        id: scrudgetId,
         name: action.payload.name,
         baseValue: action.payload.baseValue,
         currentBalance: action.payload.baseValue,
@@ -37,7 +37,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
       };
       const newPeriod: Period = {
         id: periodId,
-        budgetId: budgetId,
+        scrudgetId: scrudgetId,
         startDate: new Date().toISOString(),
         endDate: null,
         startingBalance: action.payload.baseValue,
@@ -45,17 +45,17 @@ function appReducer(state: AppState, action: AppAction): AppState {
       };
       return {
         ...state,
-        budgets: [...state.budgets, newBudget],
+        scrudgets: [...state.scrudgets, newScrudget],
         periods: [...state.periods, newPeriod],
       };
     }
 
-    case 'EDIT_BUDGET': {
-      const { budgetId, name, baseValue, color } = action.payload;
+    case 'EDIT_SCRUDGET': {
+      const { scrudgetId, name, baseValue, color } = action.payload;
       return {
         ...state,
-        budgets: state.budgets.map((b) =>
-          b.id === budgetId
+        scrudgets: state.scrudgets.map((b) =>
+          b.id === scrudgetId
             ? {
                 ...b,
                 name,
@@ -68,38 +68,38 @@ function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
-    case 'DELETE_BUDGET': {
-      const { budgetId } = action.payload;
+    case 'DELETE_SCRUDGET': {
+      const { scrudgetId } = action.payload;
       return {
         ...state,
-        budgets: state.budgets.filter((b) => b.id !== budgetId),
-        expenses: state.expenses.filter((e) => e.budgetId !== budgetId),
-        periods: state.periods.filter((p) => p.budgetId !== budgetId),
+        scrudgets: state.scrudgets.filter((b) => b.id !== scrudgetId),
+        expenses: state.expenses.filter((e) => e.scrudgetId !== scrudgetId),
+        periods: state.periods.filter((p) => p.scrudgetId !== scrudgetId),
       };
     }
 
     case 'ADD_EXPENSE': {
-      const budget = state.budgets.find((b) => b.id === action.payload.budgetId);
-      if (!budget) return state;
+      const scrudget = state.scrudgets.find((b) => b.id === action.payload.scrudgetId);
+      if (!scrudget) return state;
 
       const newExpense: Expense = {
         id: uuidv4(),
-        budgetId: action.payload.budgetId,
-        periodId: budget.currentPeriodId,
+        scrudgetId: action.payload.scrudgetId,
+        periodId: scrudget.currentPeriodId,
         name: action.payload.name,
         amount: action.payload.amount,
         createdAt: new Date().toISOString(),
       };
 
-      const updatedBudgets = state.budgets.map((b) =>
-        b.id === action.payload.budgetId
+      const updatedScrudgets = state.scrudgets.map((b) =>
+        b.id === action.payload.scrudgetId
           ? { ...b, currentBalance: b.currentBalance - action.payload.amount }
           : b
       );
 
       return {
         ...state,
-        budgets: updatedBudgets,
+        scrudgets: updatedScrudgets,
         expenses: [...state.expenses, newExpense],
       };
     }
@@ -110,15 +110,15 @@ function appReducer(state: AppState, action: AppAction): AppState {
       if (!existingExpense) return state;
 
       const diff = amount - existingExpense.amount;
-      const updatedBudgets = state.budgets.map((b) =>
-        b.id === existingExpense.budgetId
+      const updatedScrudgets = state.scrudgets.map((b) =>
+        b.id === existingExpense.scrudgetId
           ? { ...b, currentBalance: b.currentBalance - diff }
           : b
       );
 
       return {
         ...state,
-        budgets: updatedBudgets,
+        scrudgets: updatedScrudgets,
         expenses: state.expenses.map((e) =>
           e.id === expenseId ? { ...e, name, amount } : e
         ),
@@ -129,47 +129,47 @@ function appReducer(state: AppState, action: AppAction): AppState {
       const expense = state.expenses.find((e) => e.id === action.payload.expenseId);
       if (!expense) return state;
 
-      const updatedBudgets = state.budgets.map((b) =>
-        b.id === expense.budgetId
+      const updatedScrudgets = state.scrudgets.map((b) =>
+        b.id === expense.scrudgetId
           ? { ...b, currentBalance: b.currentBalance + expense.amount }
           : b
       );
 
       return {
         ...state,
-        budgets: updatedBudgets,
+        scrudgets: updatedScrudgets,
         expenses: state.expenses.filter((e) => e.id !== action.payload.expenseId),
       };
     }
 
-    case 'RESET_ALL_BUDGETS': {
+    case 'RESET_ALL_SCRUDGETS': {
       const now = new Date().toISOString();
 
       // Close all current periods
       const updatedPeriods = state.periods.map((p) => {
         if (p.endDate === null) {
-          const budget = state.budgets.find((b) => b.id === p.budgetId);
+          const scrudget = state.scrudgets.find((b) => b.id === p.scrudgetId);
           return {
             ...p,
             endDate: now,
-            finalBalance: budget ? budget.currentBalance : 0,
+            finalBalance: scrudget ? scrudget.currentBalance : 0,
           };
         }
         return p;
       });
 
-      // Create new periods for each budget
-      const newPeriods: Period[] = state.budgets.map((b) => ({
+      // Create new periods for each scrudget
+      const newPeriods: Period[] = state.scrudgets.map((b) => ({
         id: uuidv4(),
-        budgetId: b.id,
+        scrudgetId: b.id,
         startDate: now,
         endDate: null,
         startingBalance: b.baseValue,
         finalBalance: null,
       }));
 
-      // Reset budgets to base values with new period IDs
-      const resetBudgets: Budget[] = state.budgets.map((b, i) => ({
+      // Reset scrudgets to base values with new period IDs
+      const resetScrudgets: Scrudget[] = state.scrudgets.map((b, i) => ({
         ...b,
         currentBalance: b.baseValue,
         currentPeriodId: newPeriods[i].id,
@@ -177,7 +177,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
       return {
         ...state,
-        budgets: resetBudgets,
+        scrudgets: resetScrudgets,
         periods: [...updatedPeriods, ...newPeriods],
         // expenses remain — they belong to old periods
       };
@@ -195,31 +195,31 @@ function appReducer(state: AppState, action: AppAction): AppState {
   }
 }
 
-interface BudgetContextType {
+interface ScrudgetContextType {
   state: AppState;
   dispatch: React.Dispatch<AppAction>;
   colors: ThemeColors;
 }
 
-const BudgetContext = createContext<BudgetContextType | undefined>(undefined);
+const ScrudgetContext = createContext<ScrudgetContextType | undefined>(undefined);
 
-export function BudgetProvider({ children }: { children: ReactNode }) {
+export function ScrudgetProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   // Load data on mount
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [budgets, expenses, periods, themePref] = await Promise.all([
-          loadBudgets(),
+        const [scrudgets, expenses, periods, themePref] = await Promise.all([
+          loadScrudgets(),
           loadExpenses(),
           loadPeriods(),
           loadTheme(),
         ]);
-        dispatch({ type: 'LOAD_DATA', payload: { budgets, expenses, periods, themePref } });
+        dispatch({ type: 'LOAD_DATA', payload: { scrudgets, expenses, periods, themePref } });
       } catch (error) {
         console.error('Failed to load data:', error);
-        dispatch({ type: 'LOAD_DATA', payload: { budgets: [], expenses: [], periods: [], themePref: 'dark' } });
+        dispatch({ type: 'LOAD_DATA', payload: { scrudgets: [], expenses: [], periods: [], themePref: 'dark' } });
       }
     };
     loadData();
@@ -228,28 +228,28 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
   // Save data whenever state changes (after initial load)
   useEffect(() => {
     if (state.isLoaded) {
-      saveAll(state.budgets, state.expenses, state.periods).catch((error) =>
+      saveAll(state.scrudgets, state.expenses, state.periods).catch((error) =>
         console.error('Failed to save data:', error)
       );
       saveTheme(state.themePreference).catch((error) =>
         console.error('Failed to save theme:', error)
       );
     }
-  }, [state.budgets, state.expenses, state.periods, state.themePreference, state.isLoaded]);
+  }, [state.scrudgets, state.expenses, state.periods, state.themePreference, state.isLoaded]);
 
   const colors = state.themePreference === 'light' ? lightColors : darkColors;
 
   return (
-    <BudgetContext.Provider value={{ state, dispatch, colors }}>
+    <ScrudgetContext.Provider value={{ state, dispatch, colors }}>
       {children}
-    </BudgetContext.Provider>
+    </ScrudgetContext.Provider>
   );
 }
 
-export function useBudget(): BudgetContextType {
-  const context = useContext(BudgetContext);
+export function useScrudget(): ScrudgetContextType {
+  const context = useContext(ScrudgetContext);
   if (!context) {
-    throw new Error('useBudget must be used within a BudgetProvider');
+    throw new Error('useScrudget must be used within a ScrudgetProvider');
   }
   return context;
 }

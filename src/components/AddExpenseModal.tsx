@@ -9,22 +9,22 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useBudget } from '../context/BudgetContext';
+import { useScrudget } from '../context/ScrudgetContext';
 
 interface AddExpenseModalProps {
   visible: boolean;
-  budgetId: string;
+  scrudgetId: string;
   onClose: () => void;
   onSave: (name: string, amount: number) => void;
 }
 
 export default function AddExpenseModal({
   visible,
-  budgetId,
+  scrudgetId,
   onClose,
   onSave,
 }: AddExpenseModalProps) {
-  const { colors } = useBudget();
+  const { colors } = useScrudget();
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
 

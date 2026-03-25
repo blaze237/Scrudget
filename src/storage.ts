@@ -1,15 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Budget, Expense, Period } from './types';
+import { Scrudget, Expense, Period } from './types';
 
 const KEYS = {
-  BUDGETS: '@scrudget_budgets',
+  SCRUDGETS: '@scrudget_scrudgets',
   EXPENSES: '@scrudget_expenses',
   PERIODS: '@scrudget_periods',
   THEME: '@scrudget_theme',
 };
 
-export const saveBudgets = async (budgets: Budget[]): Promise<void> => {
-  await AsyncStorage.setItem(KEYS.BUDGETS, JSON.stringify(budgets));
+export const saveScrudgets = async (scrudgets: Scrudget[]): Promise<void> => {
+  await AsyncStorage.setItem(KEYS.SCRUDGETS, JSON.stringify(scrudgets));
 };
 
 export const saveExpenses = async (expenses: Expense[]): Promise<void> => {
@@ -24,8 +24,8 @@ export const saveTheme = async (theme: 'light' | 'dark'): Promise<void> => {
   await AsyncStorage.setItem(KEYS.THEME, theme);
 };
 
-export const loadBudgets = async (): Promise<Budget[]> => {
-  const data = await AsyncStorage.getItem(KEYS.BUDGETS);
+export const loadScrudgets = async (): Promise<Scrudget[]> => {
+  const data = await AsyncStorage.getItem(KEYS.SCRUDGETS);
   return data ? JSON.parse(data) : [];
 };
 
@@ -45,12 +45,12 @@ export const loadTheme = async (): Promise<'light' | 'dark'> => {
 };
 
 export const saveAll = async (
-  budgets: Budget[],
+  scrudgets: Scrudget[],
   expenses: Expense[],
   periods: Period[]
 ): Promise<void> => {
   await Promise.all([
-    saveBudgets(budgets),
+    saveScrudgets(scrudgets),
     saveExpenses(expenses),
     savePeriods(periods),
   ]);

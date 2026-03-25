@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useBudget } from '../context/BudgetContext';
+import { useScrudget } from '../context/ScrudgetContext';
 import ExpenseRow from '../components/ExpenseRow';
 import { theme, formatCurrency } from '../theme';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -16,18 +16,18 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 type Props = NativeStackScreenProps<RootStackParamList, 'PeriodDetail'>;
 
 export default function PeriodDetailScreen({ route, navigation }: Props) {
-  const { budgetId, periodId } = route.params;
-  const { state } = useBudget();
+  const { scrudgetId, periodId } = route.params;
+  const { state } = useScrudget();
 
   const period = state.periods.find((p) => p.id === periodId);
-  const budget = state.budgets.find((b) => b.id === budgetId);
+  const scrudget = state.scrudgets.find((b) => b.id === scrudgetId);
 
   const periodExpenses = useMemo(
     () =>
       state.expenses
-        .filter((e) => e.budgetId === budgetId && e.periodId === periodId)
+        .filter((e) => e.scrudgetId === scrudgetId && e.periodId === periodId)
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
-    [state.expenses, budgetId, periodId]
+    [state.expenses, scrudgetId, periodId]
   );
 
   const totalExpenses = periodExpenses.reduce((sum, e) => sum + e.amount, 0);
@@ -55,7 +55,7 @@ export default function PeriodDetailScreen({ route, navigation }: Props) {
           <Text style={styles.backText}>‹ Back</Text>
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>{budget?.name ?? 'Budget'}</Text>
+          <Text style={styles.headerTitle}>{scrudget?.name ?? 'Scrudget'}</Text>
           <Text style={styles.headerSubtitle}>
             {formatDate(period.startDate)} — {period.endDate ? formatDate(period.endDate) : 'Now'}
           </Text>
@@ -70,7 +70,7 @@ export default function PeriodDetailScreen({ route, navigation }: Props) {
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           <ExpenseRow
-            name="Budget"
+            name="Scrudget"
             amount={period.startingBalance}
             date={period.startDate}
             isIncome
@@ -95,7 +95,7 @@ export default function PeriodDetailScreen({ route, navigation }: Props) {
         <View style={styles.summaryRow}>
           <View>
             <Text style={styles.summaryLabel}>
-              Budget:{' '}
+              Scrudget:{' '}
               <Text style={{ color: theme.colors.positive }}>
                 + £ {period.startingBalance.toFixed(2)}
               </Text>
