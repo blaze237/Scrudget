@@ -5,6 +5,7 @@ const KEYS = {
   BUDGETS: '@scrudget_budgets',
   EXPENSES: '@scrudget_expenses',
   PERIODS: '@scrudget_periods',
+  THEME: '@scrudget_theme',
 };
 
 export const saveBudgets = async (budgets: Budget[]): Promise<void> => {
@@ -17,6 +18,10 @@ export const saveExpenses = async (expenses: Expense[]): Promise<void> => {
 
 export const savePeriods = async (periods: Period[]): Promise<void> => {
   await AsyncStorage.setItem(KEYS.PERIODS, JSON.stringify(periods));
+};
+
+export const saveTheme = async (theme: 'light' | 'dark'): Promise<void> => {
+  await AsyncStorage.setItem(KEYS.THEME, theme);
 };
 
 export const loadBudgets = async (): Promise<Budget[]> => {
@@ -32,6 +37,11 @@ export const loadExpenses = async (): Promise<Expense[]> => {
 export const loadPeriods = async (): Promise<Period[]> => {
   const data = await AsyncStorage.getItem(KEYS.PERIODS);
   return data ? JSON.parse(data) : [];
+};
+
+export const loadTheme = async (): Promise<'light' | 'dark'> => {
+  const data = await AsyncStorage.getItem(KEYS.THEME);
+  return data === 'light' ? 'light' : 'dark';
 };
 
 export const saveAll = async (

@@ -1,27 +1,29 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { theme, formatCurrency } from '../theme';
+import { formatCurrency } from '../theme';
+import { useBudget } from '../context/BudgetContext';
 
 interface ExpenseRowProps {
   name: string;
   amount: number;
   date: string;
   isIncome?: boolean;
-  onDelete?: () => void;
+  onAction?: () => void;
 }
 
-export default function ExpenseRow({ name, amount, date, isIncome, onDelete }: ExpenseRowProps) {
+export default function ExpenseRow({ name, amount, date, isIncome, onAction }: ExpenseRowProps) {
+  const { colors } = useBudget();
   const displayDate = new Date(date).toLocaleDateString('en-GB', {
     day: '2-digit',
     month: 'short',
   });
 
   return (
-    <View style={styles.row}>
+    <View style={[styles.row, { borderBottomColor: colors.border }]}>
       <Text
         style={[
           styles.name,
-          { color: isIncome ? theme.colors.positive : theme.colors.accent },
+          { color: isIncome ? colors.positive : (colors.textPrimary || colors.accent) },
         ]}
       >
         {name}
@@ -29,15 +31,18 @@ export default function ExpenseRow({ name, amount, date, isIncome, onDelete }: E
       <Text
         style={[
           styles.amount,
-          { color: isIncome ? theme.colors.positive : theme.colors.negative },
+          { color: isIncome ? colors.positive : colors.negative },
         ]}
       >
         {isIncome ? formatCurrency(amount) : formatCurrency(-amount)}
       </Text>
-      <Text style={styles.date}>{displayDate}</Text>
-      {onDelete ? (
-        <TouchableOpacity onPress={onDelete} style={styles.actionBtn}>
-          <Text style={styles.actionIcon}>⋮</Text>
+      <Text style={[styles.date, { color: colors.textSecondary }]}>{displayDate}</Text>
+      {onAction ? (
+        <TouchableOpacity 
+          onPress={onAction} 
+          style={[styles.actionBtn, { borderLeftColor: colors.border }]}
+        >
+          <Text style={[styles.actionIcon, { color: colors.accent }]}>⋮</Text>
         </TouchableOpacity>
       ) : (
         <View style={styles.emptyActionSpace} />
@@ -51,23 +56,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 14,
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
   },
   name: {
     flex: 1,
-    fontSize: theme.fontSize.md,
+    fontSize: 16,
     fontWeight: '500',
   },
   amount: {
-    fontSize: theme.fontSize.md,
+    fontSize: 16,
     fontWeight: '600',
     marginRight: 12,
   },
   date: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.fontSize.sm,
+    fontSize: 13,
     width: 45,
     textAlign: 'center',
     marginRight: 6,
@@ -76,15 +79,13 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderLeftWidth: 1,
-    borderLeftColor: theme.colors.border,
     justifyContent: 'center',
     alignItems: 'center',
   },
   emptyActionSpace: {
-    width: 32, // approximately the width of the action button so fields align
+    width: 32,
   },
   actionIcon: {
-    color: theme.colors.accent,
     fontSize: 20,
     fontWeight: '700',
   },

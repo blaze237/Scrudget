@@ -1,13 +1,15 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { AppState, AppAction, Budget, Expense, Period } from '../types';
-import { saveAll, loadBudgets, loadExpenses, loadPeriods } from '../storage';
+import { saveAll, loadBudgets, loadExpenses, loadPeriods, loadTheme, saveTheme } from '../storage';
+import { lightColors, darkColors, ThemeColors } from '../theme';
 
 const initialState: AppState = {
   budgets: [],
   expenses: [],
   periods: [],
   isLoaded: false,
+  themePreference: 'dark',
 };
 
 function appReducer(state: AppState, action: AppAction): AppState {
@@ -17,6 +19,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         budgets: action.payload.budgets,
         expenses: action.payload.expenses,
         periods: action.payload.periods,
+        themePreference: action.payload.themePref,
         isLoaded: true,
       };
     }
@@ -30,6 +33,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         baseValue: action.payload.baseValue,
         currentBalance: action.payload.baseValue,
         currentPeriodId: periodId,
+        color: action.payload.color,
       };
       const newPeriod: Period = {
         id: periodId,
@@ -43,6 +47,24 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         budgets: [...state.budgets, newBudget],
         periods: [...state.periods, newPeriod],
+      };
+    }
+
+    case 'EDIT_BUDGET': {
+      const { budgetId, name, baseValue, color } = action.payload;
+      return {
+        ...state,
+        budgets: state.budgets.map((b) =>
+          b.id === budgetId
+            ? {
+                ...b,
+                name,
+                currentBalance: b.currentBalance + (baseValue - b.baseValue), // Adjust balance by diff
+                baseValue,
+                color,
+              }
+            : b
+        ),
       };
     }
 
@@ -79,6 +101,27 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         budgets: updatedBudgets,
         expenses: [...state.expenses, newExpense],
+      };
+    }
+
+    case 'EDIT_EXPENSE': {
+      const { expenseId, name, amount } = action.payload;
+      const existingExpense = state.expenses.find((e) => e.id === expenseId);
+      if (!existingExpense) return state;
+
+      const diff = amount - existingExpense.amount;
+      const updatedBudgets = state.budgets.map((b) =>
+        b.id === existingExpense.budgetId
+          ? { ...b, currentBalance: b.currentBalance - diff }
+          : b
+      );
+
+      return {
+        ...state,
+        budgets: updatedBudgets,
+        expenses: state.expenses.map((e) =>
+          e.id === expenseId ? { ...e, name, amount } : e
+        ),
       };
     }
 
@@ -140,6 +183,13 @@ function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
+    case 'TOGGLE_THEME': {
+      return {
+        ...state,
+        themePreference: state.themePreference === 'light' ? 'dark' : 'light',
+      };
+    }
+
     default:
       return state;
   }
@@ -148,6 +198,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
 interface BudgetContextType {
   state: AppState;
   dispatch: React.Dispatch<AppAction>;
+  colors: ThemeColors;
 }
 
 const BudgetContext = createContext<BudgetContextType | undefined>(undefined);
@@ -159,15 +210,16 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [budgets, expenses, periods] = await Promise.all([
+        const [budgets, expenses, periods, themePref] = await Promise.all([
           loadBudgets(),
           loadExpenses(),
           loadPeriods(),
+          loadTheme(),
         ]);
-        dispatch({ type: 'LOAD_DATA', payload: { budgets, expenses, periods } });
+        dispatch({ type: 'LOAD_DATA', payload: { budgets, expenses, periods, themePref } });
       } catch (error) {
         console.error('Failed to load data:', error);
-        dispatch({ type: 'LOAD_DATA', payload: { budgets: [], expenses: [], periods: [] } });
+        dispatch({ type: 'LOAD_DATA', payload: { budgets: [], expenses: [], periods: [], themePref: 'dark' } });
       }
     };
     loadData();
@@ -179,11 +231,16 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
       saveAll(state.budgets, state.expenses, state.periods).catch((error) =>
         console.error('Failed to save data:', error)
       );
+      saveTheme(state.themePreference).catch((error) =>
+        console.error('Failed to save theme:', error)
+      );
     }
-  }, [state.budgets, state.expenses, state.periods, state.isLoaded]);
+  }, [state.budgets, state.expenses, state.periods, state.themePreference, state.isLoaded]);
+
+  const colors = state.themePreference === 'light' ? lightColors : darkColors;
 
   return (
-    <BudgetContext.Provider value={{ state, dispatch }}>
+    <BudgetContext.Provider value={{ state, dispatch, colors }}>
       {children}
     </BudgetContext.Provider>
   );

@@ -1,43 +1,52 @@
 import React from 'react';
-import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
-import { theme, formatCurrency } from '../theme';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { formatCurrency } from '../theme';
+import { useBudget } from '../context/BudgetContext';
 
 interface BudgetCardProps {
   name: string;
   balance: number;
+  color: string;
   onPress: () => void;
   onDelete?: () => void;
 }
 
-export default function BudgetCard({ name, balance, onPress, onDelete }: BudgetCardProps) {
+export default function BudgetCard({ name, balance, color, onPress, onDelete }: BudgetCardProps) {
+  const { colors } = useBudget();
   return (
     <View style={styles.cardContainer}>
       <TouchableOpacity
-        style={styles.cardMain}
+        style={[
+          styles.cardMain, 
+          { 
+            backgroundColor: color, 
+            borderColor: colors.border,
+          }
+        ]}
         onPress={onPress}
         activeOpacity={0.7}
       >
-        <Text style={styles.name}>{name}</Text>
+        <Text style={[styles.name, { color: '#1a2430' }]}>{name}</Text>
         <View style={styles.balanceSection}>
           <Text
             style={[
               styles.balance,
-              { color: balance >= 0 ? theme.colors.positive : theme.colors.negative },
+              { color: balance >= 0 ? '#10b981' : '#ef4444' }, // Force slightly darker positive/negative for pastel
             ]}
           >
             {formatCurrency(balance)}
           </Text>
-          <Text style={styles.chevron}>›</Text>
+          <Text style={[styles.chevron, { color: '#1a2430' }]}>›</Text>
         </View>
       </TouchableOpacity>
 
       {onDelete && (
         <TouchableOpacity
-          style={styles.actionBtn}
+          style={[styles.actionBtn, { backgroundColor: color, borderColor: colors.border }]}
           onPress={onDelete}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Text style={styles.actionIcon}>⋮</Text>
+          <Text style={[styles.actionIcon, { color: '#1a2430' }]}>⋮</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -48,26 +57,23 @@ const styles = StyleSheet.create({
   cardContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: theme.spacing.md,
-    marginVertical: theme.spacing.xs,
+    marginHorizontal: 16,
+    marginVertical: 4,
   },
   cardMain: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: theme.colors.surface,
-    borderTopLeftRadius: theme.borderRadius.md,
-    borderBottomLeftRadius: theme.borderRadius.md,
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10,
     borderWidth: 1,
     borderRightWidth: 0,
-    borderColor: theme.colors.border,
     paddingVertical: 18,
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: 16,
   },
   name: {
-    color: theme.colors.textPrimary,
-    fontSize: theme.fontSize.md,
+    fontSize: 16,
     fontWeight: '500',
     flex: 1,
   },
@@ -77,28 +83,24 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   balance: {
-    fontSize: theme.fontSize.md,
+    fontSize: 16,
     fontWeight: '600',
   },
   chevron: {
-    color: theme.colors.accent,
     fontSize: 22,
     fontWeight: '700',
     marginRight: 4,
   },
   actionBtn: {
-    backgroundColor: theme.colors.surface,
-    borderTopRightRadius: theme.borderRadius.md,
-    borderBottomRightRadius: theme.borderRadius.md,
+    borderTopRightRadius: 10,
+    borderBottomRightRadius: 10,
     borderWidth: 1,
-    borderColor: theme.colors.border,
     paddingVertical: 18,
     paddingHorizontal: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
   actionIcon: {
-    color: theme.colors.accent,
     fontSize: 20,
     fontWeight: '700',
   },

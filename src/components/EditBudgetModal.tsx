@@ -8,40 +8,61 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from 'react-native';
 import { useBudget } from '../context/BudgetContext';
 
-interface AddExpenseModalProps {
+export const PASTEL_COLORS = [
+  '#FFB3BA', // Red
+  '#FFDFBA', // Orange
+  '#FFFFBA', // Yellow
+  '#BAFFC9', // Green
+  '#BAE1FF', // Blue
+  '#D3B8D8', // Purple
+  '#F3D1F4', // Pink
+  '#B5E1E9', // Teal
+];
+
+export const getRandomPastel = () => PASTEL_COLORS[Math.floor(Math.random() * PASTEL_COLORS.length)];
+
+interface EditBudgetModalProps {
   visible: boolean;
-  budgetId: string;
+  budgetId: string | null;
+  initialName: string;
+  initialAmount: string;
+  initialColor: string;
   onClose: () => void;
-  onSave: (name: string, amount: number) => void;
+  onSave: (id: string, name: string, amount: number, color: string) => void;
 }
 
-export default function AddExpenseModal({
+export default function EditBudgetModal({
   visible,
   budgetId,
+  initialName,
+  initialAmount,
+  initialColor,
   onClose,
   onSave,
-}: AddExpenseModalProps) {
+}: EditBudgetModalProps) {
   const { colors } = useBudget();
-  const [name, setName] = useState('');
-  const [amount, setAmount] = useState('');
+  const [name, setName] = useState(initialName);
+  const [amount, setAmount] = useState(initialAmount);
+  const [color, setColor] = useState(initialColor);
 
-  // Reset state when modal opens
   useEffect(() => {
     if (visible) {
-      setName('');
-      setAmount('');
+      setName(initialName);
+      setAmount(initialAmount);
+      setColor(initialColor);
     }
-  }, [visible]);
+  }, [visible, initialName, initialAmount, initialColor]);
 
   const handleSave = () => {
+    if (!budgetId) return;
     const trimmedName = name.trim();
     const parsedAmount = parseFloat(amount);
-    
     if (trimmedName && !isNaN(parsedAmount) && parsedAmount > 0) {
-      onSave(trimmedName, parsedAmount);
+      onSave(budgetId, trimmedName, parsedAmount, color);
       onClose();
     }
   };
@@ -52,28 +73,40 @@ export default function AddExpenseModal({
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={[styles.overlay, { backgroundColor: colors.modalOverlay }]}
       >
-        <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.negative }]}>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>New Expense</Text>
+        <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.accent }]}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>Edit Budget</Text>
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Expense Name</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Budget Name</Text>
           <TextInput
             style={[styles.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }]}
             value={name}
             onChangeText={setName}
-            placeholder="e.g. Taxi, Coffee"
             placeholderTextColor={colors.textSecondary}
-            autoFocus
           />
 
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Amount (£)</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Base Value (£)</Text>
           <TextInput
             style={[styles.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }]}
             value={amount}
             onChangeText={setAmount}
-            placeholder="0.00"
             placeholderTextColor={colors.textSecondary}
             keyboardType="decimal-pad"
           />
+
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Color Indicator</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.colorRow}>
+            {PASTEL_COLORS.map((c) => (
+              <TouchableOpacity
+                key={c}
+                style={[
+                  styles.colorCircle,
+                  { backgroundColor: c },
+                  color === c && styles.selectedColorCircle,
+                ]}
+                onPress={() => setColor(c)}
+              />
+            ))}
+          </ScrollView>
 
           <View style={styles.buttons}>
             <TouchableOpacity 
@@ -85,7 +118,7 @@ export default function AddExpenseModal({
             <TouchableOpacity
               style={[
                 styles.saveBtn,
-                { backgroundColor: colors.negative },
+                { backgroundColor: colors.accent },
                 (!name.trim() || !amount) && styles.saveBtnDisabled,
               ]}
               onPress={handleSave}
@@ -129,6 +162,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
+  },
+  colorRow: {
+    flexDirection: 'row',
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  colorCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 12,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  selectedColorCircle: {
+    borderColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
   },
   buttons: {
     flexDirection: 'row',

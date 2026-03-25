@@ -11,37 +11,40 @@ import {
 } from 'react-native';
 import { useBudget } from '../context/BudgetContext';
 
-interface AddExpenseModalProps {
+interface EditExpenseModalProps {
   visible: boolean;
-  budgetId: string;
+  expenseId: string | null;
+  initialName: string;
+  initialAmount: string;
   onClose: () => void;
-  onSave: (name: string, amount: number) => void;
+  onSave: (id: string, name: string, amount: number) => void;
 }
 
-export default function AddExpenseModal({
+export default function EditExpenseModal({
   visible,
-  budgetId,
+  expenseId,
+  initialName,
+  initialAmount,
   onClose,
   onSave,
-}: AddExpenseModalProps) {
+}: EditExpenseModalProps) {
   const { colors } = useBudget();
-  const [name, setName] = useState('');
-  const [amount, setAmount] = useState('');
+  const [name, setName] = useState(initialName);
+  const [amount, setAmount] = useState(initialAmount);
 
-  // Reset state when modal opens
   useEffect(() => {
     if (visible) {
-      setName('');
-      setAmount('');
+      setName(initialName);
+      setAmount(initialAmount);
     }
-  }, [visible]);
+  }, [visible, initialName, initialAmount]);
 
   const handleSave = () => {
+    if (!expenseId) return;
     const trimmedName = name.trim();
     const parsedAmount = parseFloat(amount);
-    
     if (trimmedName && !isNaN(parsedAmount) && parsedAmount > 0) {
-      onSave(trimmedName, parsedAmount);
+      onSave(expenseId, trimmedName, parsedAmount);
       onClose();
     }
   };
@@ -53,7 +56,7 @@ export default function AddExpenseModal({
         style={[styles.overlay, { backgroundColor: colors.modalOverlay }]}
       >
         <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.negative }]}>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>New Expense</Text>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>Edit Expense</Text>
 
           <Text style={[styles.label, { color: colors.textSecondary }]}>Expense Name</Text>
           <TextInput

@@ -1,17 +1,4 @@
-export const theme = {
-  colors: {
-    background: '#0d1b2a',
-    surface: '#1b2838',
-    surfaceLight: '#243447',
-    border: '#2a3a4a',
-    accent: '#e8871e',
-    accentDark: '#c06e10',
-    positive: '#2ecc71',
-    negative: '#e74c3c',
-    textPrimary: '#ffffff',
-    textSecondary: '#8899aa',
-    modalOverlay: 'rgba(0, 0, 0, 0.7)',
-  },
+export const sharedTheme = {
   spacing: {
     xs: 4,
     sm: 8,
@@ -30,6 +17,42 @@ export const theme = {
     lg: 20,
     xl: 28,
   },
+};
+
+export const darkColors = {
+  background: '#0d1b2a',
+  surface: '#1b2838',
+  surfaceLight: '#243447',
+  border: '#2a3a4a',
+  accent: '#e8871e',
+  accentDark: '#c06e10',
+  positive: '#2ecc71',
+  negative: '#e74c3c',
+  textPrimary: '#ffffff',
+  textSecondary: '#8899aa',
+  modalOverlay: 'rgba(0, 0, 0, 0.7)',
+};
+
+export const lightColors = {
+  background: '#f2f5f8',
+  surface: '#ffffff',
+  surfaceLight: '#f9fafb',
+  border: '#dce1e6',
+  accent: '#e8871e',
+  accentDark: '#c06e10',
+  positive: '#2ecc71',
+  negative: '#e74c3c',
+  textPrimary: '#1a2430',
+  textSecondary: '#6e7a8a',
+  modalOverlay: 'rgba(0, 0, 0, 0.4)',
+};
+
+export type ThemeColors = typeof darkColors;
+
+// Backwards compatibility for unmodified files (defaults to dark theme)
+export const theme = {
+  ...sharedTheme,
+  colors: darkColors,
 };
 
 export const formatCurrency = (amount: number): string => {

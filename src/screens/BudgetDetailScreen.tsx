@@ -11,17 +11,23 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useBudget } from '../context/BudgetContext';
 import ExpenseRow from '../components/ExpenseRow';
 import AddExpenseModal from '../components/AddExpenseModal';
+import EditExpenseModal from '../components/EditExpenseModal';
+import ActionMenuModal from '../components/ActionMenuModal';
 import { useConfirm } from '../context/ConfirmContext';
-import { theme, formatCurrency, formatCurrencyShort } from '../theme';
+import { formatCurrency } from '../theme';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'BudgetDetail'>;
 
 export default function BudgetDetailScreen({ route, navigation }: Props) {
   const { budgetId } = route.params;
-  const { state, dispatch } = useBudget();
+  const { state, dispatch, colors } = useBudget();
   const { showConfirmDialog } = useConfirm();
+  
   const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showActionMenu, setShowActionMenu] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<{ id: string, name: string, amount: number } | null>(null);
 
   const budget = state.budgets.find((b) => b.id === budgetId);
   const currentExpenses = useMemo(
@@ -49,34 +55,58 @@ export default function BudgetDetailScreen({ route, navigation }: Props) {
     [dispatch, budgetId]
   );
 
-  const handleDeleteExpense = useCallback(
-    (expenseId: string, expenseName: string) => {
-      showConfirmDialog(
-        'Delete Expense',
-        `Delete "${expenseName}"?`,
-        () => dispatch({ type: 'DELETE_EXPENSE', payload: { expenseId } })
-      );
+  const handleEditExpense = useCallback(
+    (expenseId: string, name: string, amount: number) => {
+      dispatch({ type: 'EDIT_EXPENSE', payload: { expenseId, name, amount } });
     },
     [dispatch]
   );
 
+  const handleDeleteExpense = useCallback(() => {
+    if (!selectedExpense) return;
+    showConfirmDialog(
+      'Delete Expense',
+      `Delete "${selectedExpense.name}"?`,
+      () => {
+        dispatch({ type: 'DELETE_EXPENSE', payload: { expenseId: selectedExpense.id } });
+        setSelectedExpense(null);
+      }
+    );
+  }, [dispatch, selectedExpense, showConfirmDialog]);
+
+  const openActionMenu = (expense: any) => {
+    setSelectedExpense({ id: expense.id, name: expense.name, amount: expense.amount });
+    setShowActionMenu(true);
+  };
+
+  const onActionMenuEdit = () => {
+    setShowActionMenu(false);
+    setTimeout(() => setShowEditModal(true), 300);
+  };
+
+  const onActionMenuDelete = () => {
+    setShowActionMenu(false);
+    setTimeout(() => handleDeleteExpense(), 300);
+  };
+
   if (!budget) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>Budget not found</Text>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <Text style={[styles.errorText, { color: colors.negative }]}>Budget not found</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backText}>‹ Budgets</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{budget.name}</Text>
-        <View style={styles.headerSpacer} />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={{ backgroundColor: budget.color || colors.surface }}>
+        <View style={[styles.header, { borderBottomColor: colors.border }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Text style={[styles.backText, { color: '#1a2430', fontWeight: '600' }]}>‹ Budgets</Text>
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: '#1a2430' }]}>{budget.name}</Text>
+          <View style={styles.headerSpacer} />
+        </View>
       </View>
 
       {/* Expense List */}
@@ -86,7 +116,7 @@ export default function BudgetDetailScreen({ route, navigation }: Props) {
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           <ExpenseRow
-            name="Budget"
+            name="Budget Base"
             amount={budget.baseValue}
             date={
               state.periods.find((p) => p.id === budget.currentPeriodId)?.startDate ||
@@ -100,12 +130,12 @@ export default function BudgetDetailScreen({ route, navigation }: Props) {
             name={item.name}
             amount={item.amount}
             date={item.createdAt}
-            onDelete={() => handleDeleteExpense(item.id, item.name)}
+            onAction={() => openActionMenu(item)}
           />
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No expenses yet</Text>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No expenses yet</Text>
           </View>
         }
       />
@@ -113,52 +143,46 @@ export default function BudgetDetailScreen({ route, navigation }: Props) {
       {/* Archived Periods Link */}
       {archivedPeriods.length > 0 && (
         <TouchableOpacity
-          style={styles.archiveLink}
+          style={[styles.archiveLink, { borderTopColor: colors.border }]}
           onPress={() => navigation.navigate('ArchivedPeriods', { budgetId })}
         >
-          <Text style={styles.archiveLinkText}>
+          <Text style={[styles.archiveLinkText, { color: colors.accent }]}>
             View Past Periods ({archivedPeriods.length})
           </Text>
         </TouchableOpacity>
       )}
 
       {/* Bottom Section */}
-      <View style={styles.bottomSection}>
-        {/* Add Expense Button */}
+      <View style={[styles.bottomSection, { borderTopColor: colors.border }]}>
         <TouchableOpacity
-          style={styles.addExpenseBtn}
+          style={[styles.addExpenseBtn, { borderColor: colors.negative }]}
           onPress={() => setShowExpenseModal(true)}
         >
-          <Text style={styles.addExpenseBtnText}>Add Expense</Text>
+          <Text style={[styles.addExpenseBtnText, { color: colors.negative }]}>Add Expense</Text>
         </TouchableOpacity>
 
         {/* Summary */}
         <View style={styles.summaryRow}>
           <View>
-            <Text style={styles.summaryLabel}>
-              Budget:{' '}
-              <Text style={{ color: theme.colors.positive }}>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
+              Base:{' '}
+              <Text style={{ color: colors.positive }}>
                 + £ {budget.baseValue.toFixed(2)}
               </Text>
             </Text>
-            <Text style={styles.summaryLabel}>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
               Expenses:{' '}
-              <Text style={{ color: theme.colors.negative }}>
+              <Text style={{ color: colors.negative }}>
                 - £ {totalExpenses.toFixed(2)}
               </Text>
             </Text>
           </View>
           <View style={styles.balanceSection}>
-            <Text style={styles.balanceLabel}>Balance</Text>
+            <Text style={[styles.balanceLabel, { color: colors.textSecondary }]}>Balance</Text>
             <Text
               style={[
                 styles.balanceAmount,
-                {
-                  color:
-                    budget.currentBalance >= 0
-                      ? theme.colors.positive
-                      : theme.colors.negative,
-                },
+                { color: budget.currentBalance >= 0 ? colors.positive : colors.negative },
               ]}
             >
               {formatCurrency(budget.currentBalance)}
@@ -169,9 +193,31 @@ export default function BudgetDetailScreen({ route, navigation }: Props) {
 
       <AddExpenseModal
         visible={showExpenseModal}
+        budgetId={budgetId}
         onClose={() => setShowExpenseModal(false)}
         onSave={handleAddExpense}
       />
+
+      {selectedExpense && (
+        <EditExpenseModal
+          visible={showEditModal}
+          expenseId={selectedExpense.id}
+          initialName={selectedExpense.name}
+          initialAmount={selectedExpense.amount.toString()}
+          onClose={() => setShowEditModal(false)}
+          onSave={handleEditExpense}
+        />
+      )}
+
+      {selectedExpense && (
+        <ActionMenuModal
+          visible={showActionMenu}
+          title={selectedExpense.name}
+          onClose={() => setShowActionMenu(false)}
+          onEdit={onActionMenuEdit}
+          onDelete={onActionMenuDelete}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -179,27 +225,23 @@ export default function BudgetDetailScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: theme.spacing.md,
-    paddingHorizontal: theme.spacing.md,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
   },
   backBtn: {
     flex: 1,
   },
   backText: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.fontSize.md,
+    fontSize: 16,
   },
   headerTitle: {
-    color: theme.colors.textPrimary,
-    fontSize: theme.fontSize.lg,
+    fontSize: 20,
     fontWeight: '700',
     textAlign: 'center',
   },
@@ -214,12 +256,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.fontSize.md,
+    fontSize: 16,
   },
   errorText: {
-    color: theme.colors.negative,
-    fontSize: theme.fontSize.lg,
+    fontSize: 20,
     textAlign: 'center',
     marginTop: 100,
   },
@@ -227,53 +267,46 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
   },
   archiveLinkText: {
-    color: theme.colors.accent,
-    fontSize: theme.fontSize.md,
+    fontSize: 16,
     fontWeight: '600',
   },
   bottomSection: {
-    paddingHorizontal: theme.spacing.md,
-    paddingBottom: theme.spacing.md,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
   },
   addExpenseBtn: {
     paddingVertical: 16,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: 10,
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: theme.colors.negative,
-    marginTop: theme.spacing.md,
+    marginTop: 16,
   },
   addExpenseBtnText: {
-    color: theme.colors.negative,
-    fontSize: theme.fontSize.md,
+    fontSize: 16,
     fontWeight: '700',
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    marginTop: theme.spacing.md,
+    marginTop: 16,
   },
   summaryLabel: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.fontSize.sm,
+    fontSize: 13,
     lineHeight: 20,
   },
   balanceSection: {
     alignItems: 'flex-end',
   },
   balanceLabel: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.fontSize.sm,
+    fontSize: 13,
     marginBottom: 2,
   },
   balanceAmount: {
-    fontSize: theme.fontSize.lg,
+    fontSize: 20,
     fontWeight: '700',
   },
 });
