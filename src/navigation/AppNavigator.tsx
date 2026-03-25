@@ -24,7 +24,11 @@ export default function AppNavigator() {
           animation: 'slide_from_right',
         }}
       >
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen 
+          name="Home" 
+          component={HomeScreen} 
+          options={{ title: 'Scrudget' }}
+        />
         <Stack.Screen name="ScrudgetDetail" component={ScrudgetDetailScreen} />
         <Stack.Screen name="ArchivedPeriods" component={ArchivedPeriodsScreen} />
         <Stack.Screen name="PeriodDetail" component={PeriodDetailScreen} />

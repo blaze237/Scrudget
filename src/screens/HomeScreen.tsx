@@ -15,6 +15,7 @@ import ScrudgetCard from '../components/ScrudgetCard';
 import AddScrudgetModal from '../components/AddScrudgetModal';
 import EditScrudgetModal from '../components/EditScrudgetModal';
 import ActionMenuModal from '../components/ActionMenuModal';
+import BackupModal from '../components/BackupModal';
 import { useConfirm } from '../context/ConfirmContext';
 import { formatCurrency } from '../theme';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -28,6 +29,7 @@ export default function HomeScreen({ navigation }: Props) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
+  const [showBackupModal, setShowBackupModal] = useState(false);
   const [selectedScrudget, setSelectedScrudget] = useState<{ id: string, name: string, baseValue: number, color: string } | null>(null);
 
   const totalBalance = state.scrudgets.reduce((sum, b) => sum + b.currentBalance, 0);
@@ -151,6 +153,14 @@ export default function HomeScreen({ navigation }: Props) {
             </Text>
           </View>
         )}
+
+        {/* Backup Utility */}
+        <TouchableOpacity 
+          style={[styles.backupLink, { borderTopColor: colors.border }]} 
+          onPress={() => setShowBackupModal(true)}
+        >
+          <Text style={[styles.backupLinkText, { color: colors.textSecondary }]}>☁️ Cloud Sync & Backups</Text>
+        </TouchableOpacity>
       </View>
 
       <AddScrudgetModal
@@ -180,6 +190,11 @@ export default function HomeScreen({ navigation }: Props) {
           onDelete={onActionMenuDelete}
         />
       )}
+
+      <BackupModal
+        visible={showBackupModal}
+        onClose={() => setShowBackupModal(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -267,5 +282,16 @@ const styles = StyleSheet.create({
   totalAmount: {
     fontSize: 20,
     fontWeight: '700',
+  },
+  backupLink: {
+    marginTop: 16,
+    paddingTop: 8,
+    alignItems: 'center',
+    borderTopWidth: 1,
+  },
+  backupLinkText: {
+    fontSize: 14,
+    fontWeight: '500',
+    opacity: 0.8,
   },
 });
