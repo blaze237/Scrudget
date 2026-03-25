@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build": "npx expo export --platform web && powershell -Command \"Copy-Item public\\* dist\\ -Recurse -Force\""
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
