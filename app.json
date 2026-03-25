@@ -28,7 +28,13 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "themeColor": "#0d1b2a",
+      "backgroundColor": "#0d1b2a",
+      "meta": {
+        "apple-mobile-web-app-status-bar-style": "default",
+        "viewport": "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+      }
     },
     "extra": {
       "eas": {
