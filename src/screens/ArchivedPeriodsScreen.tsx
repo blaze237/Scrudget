@@ -10,6 +10,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useScrudget } from '../context/ScrudgetContext';
 import { formatCurrency } from '../theme';
+import GraphModal from '../components/GraphModal';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ArchivedPeriods'>;
@@ -17,6 +18,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'ArchivedPeriods'>;
 export default function ArchivedPeriodsScreen({ route, navigation }: Props) {
   const { scrudgetId } = route.params;
   const { state, colors } = useScrudget();
+  const [showGraph, setShowGraph] = React.useState(false);
 
   const archivedPeriods = useMemo(
     () =>
@@ -41,7 +43,13 @@ export default function ArchivedPeriodsScreen({ route, navigation }: Props) {
           <Text style={[styles.backText, { color: colors.textSecondary }]}>‹ Back</Text>
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Past Periods</Text>
-        <View style={styles.headerSpacer} />
+        <View style={styles.headerSpacer}>
+          {archivedPeriods.length > 0 && (
+            <TouchableOpacity onPress={() => setShowGraph(true)} style={styles.graphBtn}>
+              <Text style={{ fontSize: 24, color: colors.textPrimary }}>📈</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <FlatList
@@ -91,6 +99,14 @@ export default function ArchivedPeriodsScreen({ route, navigation }: Props) {
           </View>
         }
       />
+
+      <GraphModal
+        visible={showGraph}
+        onClose={() => setShowGraph(false)}
+        title="Balance History"
+        periods={archivedPeriods}
+        aggregateBy="period"
+      />
     </SafeAreaView>
   );
 }
@@ -120,6 +136,14 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     flex: 1,
+    alignItems: 'flex-end',
+  },
+  graphBtn: {
+    padding: 8,
+  },
+  graphBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   listContent: {
     paddingVertical: 8,

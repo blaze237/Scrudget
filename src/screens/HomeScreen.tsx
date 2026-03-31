@@ -16,6 +16,7 @@ import AddScrudgetModal from '../components/AddScrudgetModal';
 import EditScrudgetModal from '../components/EditScrudgetModal';
 import ActionMenuModal from '../components/ActionMenuModal';
 import BackupModal from '../components/BackupModal';
+import GraphModal from '../components/GraphModal';
 import { useConfirm } from '../context/ConfirmContext';
 import { formatCurrency } from '../theme';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -30,9 +31,12 @@ export default function HomeScreen({ navigation }: Props) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
   const [showBackupModal, setShowBackupModal] = useState(false);
+  const [showGraphModal, setShowGraphModal] = useState(false);
   const [selectedScrudget, setSelectedScrudget] = useState<{ id: string, name: string, baseValue: number, color: string } | null>(null);
 
   const totalBalance = state.scrudgets.reduce((sum, b) => sum + b.currentBalance, 0);
+
+  const allArchivedPeriods = state.periods.filter((p) => p.endDate !== null);
 
   const handleAddScrudget = useCallback(
     (name: string, baseValue: number, color: string) => {
@@ -92,11 +96,18 @@ export default function HomeScreen({ navigation }: Props) {
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <Image source={require('../../assets/icon.png')} style={{ width: 32, height: 32, borderRadius: 8 }} />
         <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Scrudgets</Text>
-        <TouchableOpacity style={styles.themeToggle} onPress={() => dispatch({ type: 'TOGGLE_THEME' })}>
-          <Text style={{ fontSize: 24, color: colors.textPrimary }}>
-            {state.themePreference === 'light' ? '🌙' : '☀️'}
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          {allArchivedPeriods.length > 0 && (
+            <TouchableOpacity style={styles.headerBtn} onPress={() => setShowGraphModal(true)}>
+              <Text style={{ fontSize: 24, color: colors.textPrimary }}>📈</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={styles.headerBtn} onPress={() => dispatch({ type: 'TOGGLE_THEME' })}>
+            <Text style={{ fontSize: 24, color: colors.textPrimary }}>
+              {state.themePreference === 'light' ? '🌙' : '☀️'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Scrudget List */}
@@ -195,6 +206,13 @@ export default function HomeScreen({ navigation }: Props) {
         visible={showBackupModal}
         onClose={() => setShowBackupModal(false)}
       />
+
+      <GraphModal
+        visible={showGraphModal}
+        onClose={() => setShowGraphModal(false)}
+        title="Total Wealth History"
+        periods={allArchivedPeriods}
+      />
     </SafeAreaView>
   );
 }
@@ -215,10 +233,18 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     textAlign: 'center',
+    marginLeft: 16,
   },
-  themeToggle: {
-    width: 32,
+  headerRight: {
+    flexDirection: 'row',
     alignItems: 'center',
+    minWidth: 64, // To balance the left icon width (32 + spacing) and keep title centered
+    justifyContent: 'flex-end',
+    gap: 16,
+  },
+  headerBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   listContent: {
     paddingVertical: 8,
