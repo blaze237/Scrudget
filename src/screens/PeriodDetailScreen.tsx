@@ -26,7 +26,7 @@ export default function PeriodDetailScreen({ route, navigation }: Props) {
     () =>
       state.expenses
         .filter((e) => e.scrudgetId === scrudgetId && e.periodId === periodId)
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
     [state.expenses, scrudgetId, periodId]
   );
 

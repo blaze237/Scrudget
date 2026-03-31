@@ -56,9 +56,10 @@ export default function ScrudgetCard({ name, balance, color, onPress, onDelete }
 const styles = StyleSheet.create({
   cardContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
     marginHorizontal: 16,
     marginVertical: 4,
+    minHeight: 60,
   },
   cardMain: {
     flex: 1,
@@ -95,7 +96,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 10,
     borderBottomRightRadius: 10,
     borderWidth: 1,
-    paddingVertical: 18,
     paddingHorizontal: 16,
     justifyContent: 'center',
     alignItems: 'center',

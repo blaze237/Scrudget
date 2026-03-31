@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -34,7 +34,7 @@ export default function ScrudgetDetailScreen({ route, navigation }: Props) {
     () =>
       state.expenses
         .filter((e) => e.scrudgetId === scrudgetId && e.periodId === scrudget?.currentPeriodId)
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
     [state.expenses, scrudgetId, scrudget?.currentPeriodId]
   );
 
@@ -89,6 +89,8 @@ export default function ScrudgetDetailScreen({ route, navigation }: Props) {
     setTimeout(() => handleDeleteExpense(), 300);
   };
 
+  const flatListRef = useRef<FlatList>(null);
+
   if (!scrudget) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -111,9 +113,11 @@ export default function ScrudgetDetailScreen({ route, navigation }: Props) {
 
       {/* Expense List */}
       <FlatList
+        ref={flatListRef}
         data={currentExpenses}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
+        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
         ListHeaderComponent={
           <ExpenseRow
             name="Scrudget Base"
